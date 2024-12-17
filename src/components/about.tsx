@@ -1,9 +1,31 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 
+interface Skill {
+  name: string;
+  items: string[];
+}
+
 export default function 소개() {
+  const [editingSkill, setEditingSkill] = useState<string | null>(null);
+  const [editSkills, setEditSkills] = useState<string[]>([]);
+
+  const handleEditSkill = (skillName: string, currentSkills: string[]) => {
+    setEditingSkill(skillName);
+    setEditSkills([...currentSkills]);
+  };
+
+  const handleSaveSkill = () => {
+    setEditingSkill(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingSkill(null);
+    setEditSkills([]);
+  };
+
   return (
     <div className="min-h-screen pt-20 px-6">
       <div className="max-w-4xl mx-auto">
@@ -52,7 +74,16 @@ export default function 소개() {
             <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-semibold">보안 평가</h3>
-                <button className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors">
+                <button
+                  onClick={() =>
+                    handleEditSkill('보안 평가', [
+                      '웹 모의해킹',
+                      '취약점 진단',
+                      '보안 컨설팅',
+                    ])
+                  }
+                  className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors"
+                >
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -68,20 +99,52 @@ export default function 소개() {
                   </svg>
                 </button>
               </div>
-              <ul className="space-y-2 text-gray-600 mb-4">
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>웹
-                  모의해킹
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  취약점 진단
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  보안 컨설팅
-                </li>
-              </ul>
+              {editingSkill === '보안 평가' ? (
+                <div className="space-y-2">
+                  {editSkills.map((skill, index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      value={skill}
+                      onChange={(e) => {
+                        const newSkills = [...editSkills];
+                        newSkills[index] = e.target.value;
+                        setEditSkills(newSkills);
+                      }}
+                      className="w-full px-2 py-1 border border-gray-300 rounded"
+                    />
+                  ))}
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={handleSaveSkill}
+                      className="px-3 py-1 bg-black text-white rounded text-sm"
+                    >
+                      저장
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="px-3 py-1 border border-gray-300 rounded text-sm"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <ul className="space-y-2 text-gray-600">
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>웹
+                    모의해킹
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    취약점 진단
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                    보안 컨설팅
+                  </li>
+                </ul>
+              )}
             </div>
 
             {/* 보안 도구 */}
