@@ -17,18 +17,37 @@ export default function 소개() {
   const [editSkills, setEditSkills] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchSkills = async () => {
-      const response = await fetch('/api/skills');
-      const data = await response.json();
-      if (data.length > 0) {
-        const skillsObj = data.reduce((acc: SkillsType, curr: any) => {
-          acc[curr.name] = curr.items;
-          return acc;
-        }, {});
-        setSkills(skillsObj);
+    const initializeSkills = async () => {
+      try {
+        // 먼저 기존 데이터 조회
+        const response = await fetch('/api/skills');
+        const data = await response.json();
+
+        if (data.length === 0) {
+          // 데이터가 없으면 초기 데이터 생성
+          await fetch('/api/skills/init', { method: 'POST' });
+          // 다시 데이터 조회
+          const initResponse = await fetch('/api/skills');
+          const initData = await initResponse.json();
+          const skillsObj = initData.reduce((acc: SkillsType, curr: any) => {
+            acc[curr.name] = curr.items;
+            return acc;
+          }, {});
+          setSkills(skillsObj);
+        } else {
+          // 기존 데이터가 있으면 그대로 사용
+          const skillsObj = data.reduce((acc: SkillsType, curr: any) => {
+            acc[curr.name] = curr.items;
+            return acc;
+          }, {});
+          setSkills(skillsObj);
+        }
+      } catch (error) {
+        console.error('Failed to initialize skills:', error);
       }
     };
-    fetchSkills();
+
+    initializeSkills();
   }, []);
 
   const handleEditSkill = (skillName: string, currentSkills: string[]) => {
