@@ -3,12 +3,16 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 
-interface Skill {
-  name: string;
-  items: string[];
+interface SkillsType {
+  [key: string]: string[];
 }
 
 export default function 소개() {
+  const [skills, setSkills] = useState<SkillsType>({
+    '보안 평가': ['웹 모의해킹', '취약점 진단', '보안 컨설팅'],
+    '보안 도구': ['Burp Suite', 'Nmap', 'Wireshark'],
+    개발: ['웹 개발', '보안 스크립팅', '리버스 엔지니어링'],
+  });
   const [editingSkill, setEditingSkill] = useState<string | null>(null);
   const [editSkills, setEditSkills] = useState<string[]>([]);
 
@@ -17,7 +21,11 @@ export default function 소개() {
     setEditSkills([...currentSkills]);
   };
 
-  const handleSaveSkill = () => {
+  const handleSaveSkill = (skillName: string) => {
+    setSkills({
+      ...skills,
+      [skillName]: editSkills,
+    });
     setEditingSkill(null);
   };
 
@@ -25,6 +33,72 @@ export default function 소개() {
     setEditingSkill(null);
     setEditSkills([]);
   };
+
+  const renderSkillCard = (name: string, color: string) => (
+    <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="font-semibold">{name}</h3>
+        <button
+          onClick={() => handleEditSkill(name, skills[name])}
+          className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+            />
+          </svg>
+        </button>
+      </div>
+      {editingSkill === name ? (
+        <div className="space-y-2">
+          {editSkills.map((skill, index) => (
+            <input
+              key={index}
+              type="text"
+              value={skill}
+              onChange={(e) => {
+                const newSkills = [...editSkills];
+                newSkills[index] = e.target.value;
+                setEditSkills(newSkills);
+              }}
+              className="w-full px-2 py-1 border border-gray-300 rounded"
+            />
+          ))}
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => handleSaveSkill(name)}
+              className="px-3 py-1 bg-black text-white rounded text-sm"
+            >
+              저장
+            </button>
+            <button
+              onClick={handleCancelEdit}
+              className="px-3 py-1 border border-gray-300 rounded text-sm"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      ) : (
+        <ul className="space-y-2 text-gray-600">
+          {skills[name].map((skill, index) => (
+            <li key={index} className="flex items-center gap-2">
+              <span className={`w-2 h-2 bg-${color}-500 rounded-full`}></span>
+              {skill}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen pt-20 px-6">
@@ -70,152 +144,9 @@ export default function 소개() {
             <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 보안 평가 */}
-            <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">보안 평가</h3>
-                <button
-                  onClick={() =>
-                    handleEditSkill('보안 평가', [
-                      '웹 모의해킹',
-                      '취약점 진단',
-                      '보안 컨설팅',
-                    ])
-                  }
-                  className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    />
-                  </svg>
-                </button>
-              </div>
-              {editingSkill === '보안 평가' ? (
-                <div className="space-y-2">
-                  {editSkills.map((skill, index) => (
-                    <input
-                      key={index}
-                      type="text"
-                      value={skill}
-                      onChange={(e) => {
-                        const newSkills = [...editSkills];
-                        newSkills[index] = e.target.value;
-                        setEditSkills(newSkills);
-                      }}
-                      className="w-full px-2 py-1 border border-gray-300 rounded"
-                    />
-                  ))}
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      onClick={handleSaveSkill}
-                      className="px-3 py-1 bg-black text-white rounded text-sm"
-                    >
-                      저장
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="px-3 py-1 border border-gray-300 rounded text-sm"
-                    >
-                      취소
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>웹
-                    모의해킹
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    취약점 진단
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    보안 컨설팅
-                  </li>
-                </ul>
-              )}
-            </div>
-
-            {/* 보안 도구 */}
-            <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-              <h3 className="font-semibold mb-3">보안 도구</h3>
-              <ul className="space-y-2 text-gray-600 mb-4">
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Burp Suite
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Nmap
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Wireshark
-                </li>
-              </ul>
-              <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-                수정
-              </button>
-            </div>
-
-            {/* 개발 */}
-            <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-              <h3 className="font-semibold mb-3">개발</h3>
-              <ul className="space-y-2 text-gray-600 mb-4">
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>웹
-                  개발
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  보안 스크립팅
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  리버스 엔지니어링
-                </li>
-              </ul>
-              <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                  />
-                </svg>
-                수정
-              </button>
-            </div>
+            {renderSkillCard('보안 평가', 'blue')}
+            {renderSkillCard('보안 도구', 'green')}
+            {renderSkillCard('개발', 'purple')}
           </div>
         </section>
 
