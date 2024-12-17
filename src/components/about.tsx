@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface SkillsType {
@@ -16,17 +16,45 @@ export default function 소개() {
   const [editingSkill, setEditingSkill] = useState<string | null>(null);
   const [editSkills, setEditSkills] = useState<string[]>([]);
 
+  useEffect(() => {
+    const fetchSkills = async () => {
+      const response = await fetch('/api/skills');
+      const data = await response.json();
+      if (data.length > 0) {
+        const skillsObj = data.reduce((acc: SkillsType, curr: any) => {
+          acc[curr.name] = curr.items;
+          return acc;
+        }, {});
+        setSkills(skillsObj);
+      }
+    };
+    fetchSkills();
+  }, []);
+
   const handleEditSkill = (skillName: string, currentSkills: string[]) => {
     setEditingSkill(skillName);
     setEditSkills([...currentSkills]);
   };
 
-  const handleSaveSkill = (skillName: string) => {
-    setSkills({
-      ...skills,
-      [skillName]: editSkills,
-    });
-    setEditingSkill(null);
+  const handleSaveSkill = async (skillName: string) => {
+    try {
+      await fetch('/api/skills', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: skillName,
+          items: editSkills,
+        }),
+      });
+
+      setSkills({
+        ...skills,
+        [skillName]: editSkills,
+      });
+      setEditingSkill(null);
+    } catch (error) {
+      console.error('Failed to save skills:', error);
+    }
   };
 
   const handleCancelEdit = () => {
