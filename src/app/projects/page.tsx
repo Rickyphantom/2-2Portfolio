@@ -15,6 +15,12 @@ interface Repository {
   image_url?: string;
 }
 
+interface MongoProject {
+  id: number;
+  custom_description?: string;
+  image_url?: string;
+}
+
 export default function ProjectsPage() {
   const [repos, setRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,19 +31,42 @@ export default function ProjectsPage() {
   useEffect(() => {
     const fetchRepos = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        const response = await fetch(
+        setLoading(true);
+
+        // GitHub 데이터 가져오기
+        const githubResponse = await fetch(
           'https://api.github.com/users/Rickyphantom/repos'
         );
-        const data = await response.json();
-        setRepos(
-          data.map((repo: Repository) => ({
-            ...repo,
-            image_url: '/net.png',
-          }))
-        );
+        const githubData = await githubResponse.json();
+
+        // MongoDB 데이터 가져오기
+        const mongoResponse = await fetch('/api/projects');
+        const mongoData = await mongoResponse.json();
+
+        // GitHub 데이터를 기본 형식으로 변환
+        const formattedRepos = githubData.map((repo: Repository) => ({
+          ...repo,
+          image_url: '/net.png',
+        }));
+
+        // MongoDB 데이터로 GitHub 데이터 업데이트
+        const finalRepos = formattedRepos.map((repo: Repository) => {
+          const savedData = mongoData.find(
+            (p: MongoProject) => p.id === repo.id
+          );
+          if (savedData) {
+            return {
+              ...repo,
+              custom_description: savedData.custom_description,
+              image_url: savedData.image_url,
+            };
+          }
+          return repo;
+        });
+
+        setRepos(finalRepos);
       } catch (error) {
-        console.error('Error fetching repos:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -59,20 +88,54 @@ export default function ProjectsPage() {
     setImagePreview(repo.image_url || '');
   };
 
-  const handleSave = (repo: Repository) => {
-    setRepos(
-      repos.map((r) =>
-        r.id === repo.id
-          ? {
-              ...r,
-              custom_description: editText,
-              image_url: imagePreview || r.image_url,
-            }
-          : r
-      )
-    );
-    setEditingId(null);
-    setImagePreview('');
+  const handleSave = async (repo: Repository) => {
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: repo.id,
+          custom_description: editText,
+          image_url: imagePreview || repo.image_url,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save project');
+      }
+
+      // 로��� 상태 업데이트
+      setRepos(
+        repos.map((r) =>
+          r.id === repo.id
+            ? {
+                ...r,
+                custom_description: editText,
+                image_url: imagePreview || r.image_url,
+              }
+            : r
+        )
+      );
+      setEditingId(null);
+      setImagePreview('');
+
+      // 변경사항 확인을 위해 데이터 다시 로드
+      const refreshResponse = await fetch('/api/projects');
+      const refreshData = await refreshResponse.json();
+      if (refreshData.length > 0) {
+        setRepos((prevRepos) =>
+          prevRepos.map((repo) => {
+            const updatedProject = refreshData.find(
+              (p: Repository) => p.id === repo.id
+            );
+            return updatedProject || repo;
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Failed to save project:', error);
+      alert('프로젝트 저장에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   if (loading) {

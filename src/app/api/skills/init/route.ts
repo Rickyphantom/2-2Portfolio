@@ -27,7 +27,8 @@ export async function POST() {
     await Skills.insertMany(initialSkills);
 
     return NextResponse.json({ message: 'Initial skills data created' });
-  } catch (error) {
+  } catch (err) {
+    console.error('Failed to initialize skills:', err);
     return NextResponse.json(
       { error: 'Failed to initialize skills' },
       { status: 500 }

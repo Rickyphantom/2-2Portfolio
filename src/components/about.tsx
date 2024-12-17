@@ -7,7 +7,12 @@ interface SkillsType {
   [key: string]: string[];
 }
 
-export default function 소개() {
+interface SkillData {
+  name: string;
+  items: string[];
+}
+
+export default function About() {
   const [skills, setSkills] = useState<SkillsType>({
     '보안 평가': ['웹 모의해킹', '취약점 진단', '보안 컨설팅'],
     '보안 도구': ['Burp Suite', 'Nmap', 'Wireshark'],
@@ -29,14 +34,16 @@ export default function 소개() {
           // 다시 데이터 조회
           const initResponse = await fetch('/api/skills');
           const initData = await initResponse.json();
-          const skillsObj = initData.reduce((acc: SkillsType, curr: any) => {
-            acc[curr.name] = curr.items;
-            return acc;
-          }, {});
+          const skillsObj = initData.reduce(
+            (acc: SkillsType, curr: SkillData) => {
+              acc[curr.name] = curr.items;
+              return acc;
+            },
+            {}
+          );
           setSkills(skillsObj);
         } else {
-          // 기존 데이터가 있으면 그대로 사용
-          const skillsObj = data.reduce((acc: SkillsType, curr: any) => {
+          const skillsObj = data.reduce((acc: SkillsType, curr: SkillData) => {
             acc[curr.name] = curr.items;
             return acc;
           }, {});

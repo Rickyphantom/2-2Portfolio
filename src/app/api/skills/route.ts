@@ -8,7 +8,8 @@ export async function GET() {
     await connectMongoDB();
     const skills = await Skills.find();
     return NextResponse.json(skills);
-  } catch (error) {
+  } catch (err) {
+    console.error('Failed to fetch skills:', err);
     return NextResponse.json(
       { error: 'Failed to fetch skills' },
       { status: 500 }
@@ -23,7 +24,8 @@ export async function PUT(request: Request) {
     await connectMongoDB();
     await Skills.findOneAndUpdate({ name }, { items }, { upsert: true });
     return NextResponse.json({ message: 'Skills updated' });
-  } catch (error) {
+  } catch (err) {
+    console.error('Failed to update skills:', err);
     return NextResponse.json(
       { error: 'Failed to update skills' },
       { status: 500 }

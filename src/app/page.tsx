@@ -1,5 +1,5 @@
-import 소개 from '@/components/about';
+import About from '@/components/about';
 
 export default function Home() {
-  return <소개 />;
+  return <About />;
 }
