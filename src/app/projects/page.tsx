@@ -17,6 +17,7 @@ interface Project {
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showQR, setShowQR] = useState<number | null>(null);
+  const [editingImageId, setEditingImageId] = useState<number | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -95,7 +96,7 @@ export default function ProjectsPage() {
             >
               <div className="flex flex-col md:flex-row gap-6">
                 {project.image_url && (
-                  <div className="w-full md:w-1/3 relative aspect-video">
+                  <div className="w-full md:w-1/3 relative aspect-video group">
                     <Image
                       src={project.image_url}
                       alt={project.name}
@@ -103,13 +104,37 @@ export default function ProjectsPage() {
                       className="object-cover rounded-lg"
                       unoptimized
                     />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange(e, project.id)}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                      title="이미지 변경하기"
-                    />
+                    <div
+                      className="absolute inset-0 bg-black bg-opacity-50 opacity-0 
+                      group-hover:opacity-100 transition-opacity duration-200 rounded-lg 
+                      flex items-center justify-center"
+                    >
+                      <label
+                        className="cursor-pointer px-4 py-2 bg-gray-700 text-white rounded
+                          hover:bg-gray-600 transition-colors flex items-center gap-2"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                          />
+                        </svg>
+                        이미지 변경
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileChange(e, project.id)}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
                   </div>
                 )}
                 <div className="flex-1">
