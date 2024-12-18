@@ -37,7 +37,7 @@ export default function ProjectsPage() {
 
       const finalProjects = formattedProjects.map((project: Project) => {
         const savedData = mongoData.find((p: Project) => p.id === project.id);
-        return savedData 
+        return savedData
           ? { ...project, ...savedData }
           : { ...project, image_url: '/net.png' };
       });
@@ -59,7 +59,7 @@ export default function ProjectsPage() {
     setEditImageUrl(project.image_url || '/net.png');
   };
 
-  const handleSave = async (id: number) => {
+  const handleSave = async (id: number, imageUrl?: string) => {
     try {
       const response = await fetch('/api/projects', {
         method: 'PUT',
@@ -68,7 +68,7 @@ export default function ProjectsPage() {
           id,
           name: editName,
           custom_description: editDescription,
-          image_url: editImageUrl,
+          image_url: imageUrl || editImageUrl,
         }),
       });
 
