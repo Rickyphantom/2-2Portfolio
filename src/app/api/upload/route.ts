@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(request: Request) {
   try {
@@ -12,14 +17,19 @@ export async function POST(request: Request) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const base64String = `data:${file.type};base64,${buffer.toString(
+      'base64'
+    )}`;
 
     const filename = `${Date.now()}-${file.name}`;
-    const filepath = path.join(process.cwd(), 'public/uploads', filename);
+    const result = await cloudinary.uploader.upload(base64String, {
+      public_id: filename,
+      resource_type: 'auto',
+    });
 
-    await writeFile(filepath, buffer);
     return NextResponse.json({
       message: 'File uploaded',
-      url: `/uploads/${filename}`,
+      url: result.secure_url,
     });
   } catch {
     return NextResponse.json(
