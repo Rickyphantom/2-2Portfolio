@@ -97,6 +97,7 @@ export default function ProjectsPage() {
         const data = await response.json();
         if (data.url) {
           setEditImageUrl(data.url);
+          await handleSave(editingId as number, data.url);
         }
       } catch (error) {
         console.error('Failed to upload image:', error);
@@ -221,7 +222,7 @@ export default function ProjectsPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <a
-                      href={project.github_url}
+                      href={`https://github.com/Rickyphantom/${project.name}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-gray-400 hover:text-white transition-colors"
