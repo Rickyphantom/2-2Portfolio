@@ -18,6 +18,9 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showQR, setShowQR] = useState<number | null>(null);
   const [editingImageId, setEditingImageId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const fetchProjects = async () => {
     try {
@@ -78,6 +81,30 @@ export default function ProjectsPage() {
       } catch (error) {
         console.error('Failed to upload image:', error);
       }
+    }
+  };
+
+  const handleEdit = (project: Project) => {
+    setEditingId(project.id);
+    setEditName(project.name);
+    setEditDescription(project.custom_description || project.description);
+  };
+
+  const handleSave = async (id: number) => {
+    try {
+      await fetch('/api/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          name: editName,
+          custom_description: editDescription,
+        }),
+      });
+      setEditingId(null);
+      fetchProjects();
+    } catch (error) {
+      console.error('Failed to save project:', error);
     }
   };
 
