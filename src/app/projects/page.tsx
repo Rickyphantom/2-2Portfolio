@@ -17,10 +17,6 @@ interface Project {
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showQR, setShowQR] = useState<number | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [editImageUrl, setEditImageUrl] = useState('');
 
   const fetchProjects = async () => {
     try {
@@ -52,59 +48,6 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const handleEdit = (project: Project) => {
-    setEditingId(project.id);
-    setEditName(project.name);
-    setEditDescription(project.custom_description || project.description);
-    setEditImageUrl(project.image_url || '/net.png');
-  };
-
-  const handleSave = async (id: number, imageUrl?: string) => {
-    try {
-      const response = await fetch('/api/projects', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id,
-          name: editName,
-          custom_description: editDescription,
-          image_url: imageUrl || editImageUrl,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save project');
-      }
-
-      setEditingId(null);
-      fetchProjects();
-    } catch (error) {
-      console.error('Failed to save project:', error);
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        const data = await response.json();
-        if (data.url) {
-          setEditImageUrl(data.url);
-          await handleSave(editingId as number, data.url);
-        }
-      } catch (error) {
-        console.error('Failed to upload image:', error);
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
       <div className="max-w-4xl mx-auto">
@@ -132,69 +75,14 @@ export default function ProjectsPage() {
                 )}
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
-                    {editingId === project.id ? (
-                      <div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          className="w-full text-gray-300 mb-2"
-                        />
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="w-full px-3 py-2 mb-2 bg-gray-700 border border-gray-600 rounded text-white"
-                        />
-                        <textarea
-                          value={editDescription}
-                          onChange={(e) => setEditDescription(e.target.value)}
-                          className="w-full px-3 py-2 mb-4 bg-gray-700 border border-gray-600 rounded text-white"
-                          rows={3}
-                        />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleSave(project.id)}
-                            className="px-4 py-1.5 bg-gray-600 text-white rounded hover:bg-gray-500"
-                          >
-                            저장
-                          </button>
-                          <button
-                            onClick={() => setEditingId(null)}
-                            className="px-4 py-1.5 border border-gray-600 text-gray-300 rounded hover:bg-gray-700"
-                          >
-                            취소
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <h2 className="text-xl font-bold mb-4 text-white">
-                          {project.name}
-                          <button
-                            onClick={() => handleEdit(project)}
-                            className="ml-2 text-gray-400 hover:text-white"
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                              />
-                            </svg>
-                          </button>
-                        </h2>
-                        <p className="text-gray-300 mb-4">
-                          {project.custom_description || project.description}
-                        </p>
-                      </div>
-                    )}
+                    <div>
+                      <h2 className="text-xl font-bold mb-4 text-white">
+                        {project.name}
+                      </h2>
+                      <p className="text-gray-300 mb-4">
+                        {project.custom_description || project.description}
+                      </p>
+                    </div>
                     <button
                       onClick={() =>
                         setShowQR(showQR === project.id ? null : project.id)
