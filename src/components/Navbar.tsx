@@ -9,7 +9,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed h-full top-0 left-0 z-50 bg-black text-white flex flex-col justify-between w-64 border-r border-gray-800">
+    <nav className="fixed h-full top-0 left-0 z-50 bg-gray-800 text-white flex flex-col justify-between w-64 border-r border-gray-700">
       {/* 프로필 섹션 */}
       <div className="p-6">
         <Link href={'/'} className="block">
@@ -53,15 +53,23 @@ export default function Navbar() {
             프로젝트
           </Link>
           <Link
-            href="/contact"
+            href="/goals"
             className={`px-4 py-2 rounded transition-colors ${
-              pathname === '/contact'
-                ? 'bg-gray-800 text-white font-medium'
-                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              pathname === '/goals'
+                ? 'bg-gray-700 text-white font-medium'
+                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
             }`}
           >
-            연락하기
+            목표
           </Link>
+          <a
+            href="https://finalteam.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 rounded transition-colors text-gray-300 hover:bg-gray-800 hover:text-white"
+          >
+            팀 프로젝트
+          </a>
         </div>
       </div>
 

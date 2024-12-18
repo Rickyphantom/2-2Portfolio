@@ -164,12 +164,14 @@ export default function About() {
             <p className="text-gray-700 leading-relaxed mb-4">
               안녕하세요! 정보보호학과에서 공부하고 있는 유선빈입니다. 보안
               컨설턴트를 목표로 정보보안과 취약점 진단에 깊은 관심을 가지고
-              있으며, 현재는 모의해킹과 보안 컨설팅 역량을 키우고 있습니다.
+              있으며, 현재는 모의해킹과 보안 컨설팅 역량을 키우고 있습니다. 특히
+              기업의 보안 수준 향상과 안전한 IT 환경 구축에 기여하고자 합니다.
             </p>
             <p className="text-gray-700 leading-relaxed">
-              특히 웹/모바일 보안 취약점 진단과 보안 아키텍처 설계에 관심이
-              많으며, 기업의 보안 수준을 향상시키는 것에 큰 흥미를 가지고
-              있습니다.
+              웹/모바일 보안 취약점 진단과 보안 아키텍처 설계에 전문성을 가진
+              보안 컨설턴트가 되는 것이 목표입니다. ISMS-P, ISO 27001 등
+              정보보호 관리체계에 대한 이해를 바탕으로 기업의 전반적인 보안
+              수준을 향상시키는 데 기여하고 싶습니다.
             </p>
           </div>
           <div className="w-64 h-64 relative">
@@ -234,6 +236,50 @@ export default function About() {
               <p className="text-gray-700 mt-2">
                 - 정보보호 기초 이론 학습 - 프로그래밍 기초 과정 이수
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 목표 섹션 추가 */}
+        <section className="mb-12">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold">Goals & Vision</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="text-lg font-semibold mb-4">단기 목표</h3>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  정보보안기사 자격증 취득
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>웹
+                  모의해킹 실무 역량 강화
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  보안 취약점 분석 프로젝트 수행
+                </li>
+              </ul>
+            </div>
+
+            <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="text-lg font-semibold mb-4">장기 목표</h3>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                  보안 컨설팅 전문가로 성장
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                  기업 보안 아키텍처 설계 전문성 확보
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                  정보보호 관리체계 컨설팅 역량 개발
+                </li>
+              </ul>
             </div>
           </div>
         </section>
