@@ -166,14 +166,67 @@ export default function ProjectsPage() {
                 )}
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
-                    <div>
-                      <h2 className="text-xl font-bold mb-4 text-white">
-                        {project.name}
-                      </h2>
-                      <p className="text-gray-300 mb-4">
-                        {project.custom_description || project.description}
-                      </p>
-                    </div>
+                    {editingId === project.id ? (
+                      <div className="w-full">
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full px-3 py-2 mb-2 bg-gray-700 border border-gray-600 
+                            rounded text-white"
+                        />
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full px-3 py-2 mb-4 bg-gray-700 border border-gray-600 
+                            rounded text-white"
+                          rows={3}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleSave(project.id)}
+                            className="px-4 py-1.5 bg-gray-600 text-white rounded 
+                              hover:bg-gray-500"
+                          >
+                            저장
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-4 py-1.5 border border-gray-600 text-gray-300 
+                              rounded hover:bg-gray-700"
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <h2 className="text-xl font-bold mb-4 text-white">
+                          {project.name}
+                          <button
+                            onClick={() => handleEdit(project)}
+                            className="ml-2 text-gray-400 hover:text-white"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </h2>
+                        <p className="text-gray-300 mb-4">
+                          {project.custom_description || project.description}
+                        </p>
+                      </div>
+                    )}
                     <button
                       onClick={() =>
                         setShowQR(showQR === project.id ? null : project.id)
