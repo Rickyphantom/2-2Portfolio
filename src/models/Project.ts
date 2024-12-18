@@ -1,11 +1,13 @@
-export interface Project {
-  id: number;
-  name: string;
-  description: string;
-  html_url: string;
-  language: string;
-  stargazers_count: number;
-  updated_at: string;
-  custom_description?: string;
-  image_url?: string;
-}
+import mongoose from 'mongoose';
+
+const projectSchema = new mongoose.Schema({
+  id: Number,
+  name: String,
+  description: String,
+  custom_description: String,
+  image_url: String,
+  github_url: String,
+});
+
+export default mongoose.models.Project ||
+  mongoose.model('Project', projectSchema);
