@@ -20,7 +20,17 @@ export async function PUT(request: Request) {
     const { id, name, custom_description, image_url } = await request.json();
     await connectMongoDB();
 
-    await Project.findOneAndUpdate({ id }, { image_url }, { upsert: true });
+    const updateData: {
+      name?: string;
+      custom_description?: string;
+      image_url?: string;
+    } = {};
+
+    if (name) updateData.name = name;
+    if (custom_description) updateData.custom_description = custom_description;
+    if (image_url) updateData.image_url = image_url;
+
+    await Project.findOneAndUpdate({ id }, updateData, { upsert: true });
 
     return NextResponse.json({ message: 'Project updated' });
   } catch {
