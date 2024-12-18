@@ -48,6 +48,38 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
+  const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    projectId: number
+  ) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.url) {
+          await fetch('/api/projects', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: projectId,
+              image_url: data.url,
+            }),
+          });
+          fetchProjects();
+        }
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
       <div className="max-w-4xl mx-auto">
@@ -70,6 +102,13 @@ export default function ProjectsPage() {
                       fill
                       className="object-cover rounded-lg"
                       unoptimized
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, project.id)}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      title="이미지 변경하기"
                     />
                   </div>
                 )}

@@ -164,8 +164,9 @@ export default function About() {
             <p className="text-gray-700 leading-relaxed mb-4">
               안녕하세요! 정보보호학과에서 공부하고 있는 유선빈입니다. 보안
               컨설턴트를 목표로 정보보안과 취약점 진단에 깊은 관심을 가지고
-              있으며, 현재는 모의해킹과 보안 컨설팅 역량을 키우고 있습니다. 특히
-              기업의 보안 수준 향상과 안전한 IT 환경 구축에 기여하고자 합니다.
+              있으며, 현재는 웹 모의해킹과 보안 컨설팅 역량을 키우고 있습니다.
+              특히 기업의 보안 수준 향상과 안전한 IT 환경 구축에 기여하고자
+              합니다.
             </p>
             <p className="text-gray-700 leading-relaxed">
               웹/모바일 보안 취약점 진단과 보안 아키텍처 설계에 전문성을 가진
@@ -215,10 +216,11 @@ export default function About() {
             <div>
               <h3 className="font-semibold">중부대학교 정보보호학과</h3>
               <p className="text-gray-600">2023년 9월 - 현재</p>
-              <p className="text-gray-700 mt-2">
-                - 정보보안 기초 및 모의해킹 실습 - 보안 취약점 분석 및 대응 방안
-                연구 - 네트워크/시스템 보안 아키텍처 설계
-              </p>
+              <ul className="text-gray-700 mt-2 list-disc pl-4">
+                <li>정보보안 기초 및 모의해킹 실습</li>
+                <li>보안 취약점 분석 및 대응 방안 연구</li>
+                <li>네트워크/시스템 보안 아키텍처 설계</li>
+              </ul>
             </div>
 
             <div>

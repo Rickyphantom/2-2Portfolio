@@ -17,28 +17,15 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const { id, name, custom_description, image_url } = await request.json();
+    const { id, image_url } = await request.json();
     await connectMongoDB();
 
-    const updateData: {
-      name: string;
-      custom_description: string;
-      image_url?: string;
-    } = {
-      name,
-      custom_description,
-    };
+    await Project.findOneAndUpdate({ id }, { image_url }, { upsert: true });
 
-    if (image_url) {
-      updateData.image_url = image_url;
-    }
-
-    await Project.findOneAndUpdate({ id }, updateData, { upsert: true });
-
-    return NextResponse.json({ message: 'Project updated' });
+    return NextResponse.json({ message: 'Project image updated' });
   } catch {
     return NextResponse.json(
-      { error: 'Failed to update project' },
+      { error: 'Failed to update project image' },
       { status: 500 }
     );
   }
