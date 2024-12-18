@@ -94,22 +94,23 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center sm:text-left text-gray-700">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center sm:text-left text-white">
           더 나은 내일을 위해
         </h1>
 
         <div className="space-y-8 sm:space-y-12">
-          {/* 2025년 목표 */}
           <section>
             <div className="flex justify-between items-center mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold text-gray-600">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-200">
                 2025년 목표
               </h2>
               <button
                 onClick={() => setIsAdding('2025')}
-                className="px-3 py-1.5 bg-gray-500 text-white rounded text-sm hover:bg-gray-400 transition-colors"
+                className="px-3 py-1.5 bg-gray-700 text-white rounded text-sm 
+                  hover:bg-gray-600 transform hover:-translate-y-0.5 
+                  transition-all duration-200 hover:shadow-md"
               >
                 목표 추가
               </button>
@@ -156,12 +157,17 @@ export default function GoalsPage() {
               </div>
             )}
 
-            <div className="bg-white rounded-lg border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-lg transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 group">
+            <div
+              className="bg-gray-800 rounded-lg border border-gray-700 p-4 sm:p-6 
+              shadow-sm hover:shadow-lg transition-all duration-300 
+              hover:border-gray-600 hover:bg-gray-750 group"
+            >
               <ul className="space-y-4 sm:space-y-6">
                 {goals2025.map((goal) => (
                   <li
                     key={goal._id}
-                    className="flex items-start gap-3 sm:gap-4 p-3 rounded-lg hover:bg-white transition-all duration-200 group/item"
+                    className="flex items-start gap-3 sm:gap-4 p-3 rounded-lg
+                      hover:bg-gray-750 transition-all duration-200 group/item"
                   >
                     <span className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></span>
                     <div className="flex-1">
@@ -184,7 +190,7 @@ export default function GoalsPage() {
                               onClick={() => handleSave(goal._id)}
                               className="px-4 py-1.5 bg-gray-600 text-gray-100 rounded text-sm hover:bg-gray-500 transition-colors"
                             >
-                              저장
+                              수정
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
@@ -197,15 +203,17 @@ export default function GoalsPage() {
                       ) : (
                         <div>
                           <div className="flex justify-between items-start">
-                            <h3 className="font-medium mb-1 text-base sm:text-lg text-gray-600 group-hover/item:text-gray-800 transition-colors duration-200">
+                            <h3
+                              className="font-medium mb-1 text-base sm:text-lg text-gray-200 
+                              group-hover/item:text-white transition-colors duration-200"
+                            >
                               {goal.title}
                             </h3>
                             <div className="flex gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">
                               <button
                                 onClick={() => handleEdit(goal)}
-                                className="text-gray-400 hover:text-gray-600 transform 
-                                  hover:scale-110 transition-all duration-200 
-                                  hover:rotate-12"
+                                className="text-gray-400 hover:text-white transform 
+                                  hover:scale-110 transition-all duration-200"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -224,8 +232,7 @@ export default function GoalsPage() {
                               <button
                                 onClick={() => handleDelete(goal._id)}
                                 className="text-gray-400 hover:text-red-600 transform 
-                                  hover:scale-110 transition-all duration-200 
-                                  hover:-rotate-12"
+                                  hover:scale-110 transition-all duration-200"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -243,7 +250,7 @@ export default function GoalsPage() {
                               </button>
                             </div>
                           </div>
-                          <p className="text-gray-500 text-sm sm:text-base">
+                          <p className="text-gray-400 text-sm sm:text-base">
                             {goal.description}
                           </p>
                         </div>
@@ -255,7 +262,6 @@ export default function GoalsPage() {
             </div>
           </section>
 
-          {/* 장기 목표 */}
           <section>
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-semibold text-gray-600">

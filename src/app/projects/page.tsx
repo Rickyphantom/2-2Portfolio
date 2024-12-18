@@ -2,101 +2,73 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { QRCodeSVG } from 'qrcode.react';
 
-interface Repository {
+interface Project {
   id: number;
   name: string;
   description: string;
-  html_url: string;
-  language: string;
-  stargazers_count: number;
-  updated_at: string;
-  custom_description?: string;
-  image_url?: string;
-}
-
-interface MongoProject {
-  id: number;
+  github_url: string;
+  vercel_url?: string;
   custom_description?: string;
   image_url?: string;
 }
 
 export default function ProjectsPage() {
-  const [repos, setRepos] = useState<Repository[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [showQR, setShowQR] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editText, setEditText] = useState('');
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editImageUrl, setEditImageUrl] = useState('');
 
-  useEffect(() => {
-    const fetchRepos = async () => {
-      try {
-        setLoading(true);
+  const fetchProjects = async () => {
+    try {
+      const githubResponse = await fetch(
+        'https://api.github.com/users/Rickyphantom/repos'
+      );
+      const githubData = await githubResponse.json();
+      const mongoResponse = await fetch('/api/projects');
+      const mongoData = await mongoResponse.json();
 
-        // GitHub 데이터 가져오기
-        const githubResponse = await fetch(
-          'https://api.github.com/users/Rickyphantom/repos'
-        );
-        const githubData = await githubResponse.json();
+      const formattedProjects = githubData.map((project: Project) => ({
+        ...project,
+      }));
 
-        // MongoDB 데이터 가져오기
-        const mongoResponse = await fetch('/api/projects');
-        const mongoData = await mongoResponse.json();
+      const finalProjects = formattedProjects.map((project: Project) => {
+        const savedData = mongoData.find((p: Project) => p.id === project.id);
+        return savedData 
+          ? { ...project, ...savedData }
+          : { ...project, image_url: '/net.png' };
+      });
 
-        // GitHub 데이터를 기본 형식으로 변환
-        const formattedRepos = githubData.map((repo: Repository) => ({
-          ...repo,
-          image_url: '/net.png',
-        }));
-
-        // MongoDB 데이터로 GitHub 데이터 업데이트
-        const finalRepos = formattedRepos.map((repo: Repository) => {
-          const savedData = mongoData.find(
-            (p: MongoProject) => p.id === repo.id
-          );
-          if (savedData) {
-            return {
-              ...repo,
-              custom_description: savedData.custom_description,
-              image_url: savedData.image_url,
-            };
-          }
-          return repo;
-        });
-
-        setRepos(finalRepos);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRepos();
-  }, []);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
+      setProjects(finalProjects);
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
   };
 
-  const handleEdit = (repo: Repository) => {
-    setEditingId(repo.id);
-    setEditText(repo.custom_description || '');
-    setImagePreview(repo.image_url || '');
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleEdit = (project: Project) => {
+    setEditingId(project.id);
+    setEditName(project.name);
+    setEditDescription(project.custom_description || project.description);
+    setEditImageUrl(project.image_url || '/net.png');
   };
 
-  const handleSave = async (repo: Repository) => {
+  const handleSave = async (id: number) => {
     try {
       const response = await fetch('/api/projects', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: repo.id,
-          custom_description: editText,
-          image_url: imagePreview || repo.image_url,
+          id,
+          name: editName,
+          custom_description: editDescription,
+          image_url: editImageUrl,
         }),
       });
 
@@ -104,175 +76,201 @@ export default function ProjectsPage() {
         throw new Error('Failed to save project');
       }
 
-      // 로��� 상태 업데이트
-      setRepos(
-        repos.map((r) =>
-          r.id === repo.id
-            ? {
-                ...r,
-                custom_description: editText,
-                image_url: imagePreview || r.image_url,
-              }
-            : r
-        )
-      );
       setEditingId(null);
-      setImagePreview('');
-
-      // 변경사항 확인을 위해 데이터 다시 로드
-      const refreshResponse = await fetch('/api/projects');
-      const refreshData = await refreshResponse.json();
-      if (refreshData.length > 0) {
-        setRepos((prevRepos) =>
-          prevRepos.map((repo) => {
-            const updatedProject = refreshData.find(
-              (p: Repository) => p.id === repo.id
-            );
-            return updatedProject || repo;
-          })
-        );
-      }
+      fetchProjects();
     } catch (error) {
       console.error('Failed to save project:', error);
-      alert('프로젝트 저장에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen pt-20 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
-          <p className="text-lg">로딩중...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.url) {
+          setEditImageUrl(data.url);
+        }
+      } catch (error) {
+        console.error('Failed to upload image:', error);
+      }
+    }
+  };
 
   return (
-    <div className="min-h-screen pt-20">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-        {repos.map((repo) => (
-          <div key={repo.id} className="border border-gray-200 p-4 rounded-lg">
-            <a
-              href={repo.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mb-4 relative aspect-video overflow-hidden"
+    <div className="min-h-screen pt-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-8 text-white">
+          프로젝트
+        </h1>
+        <div className="grid grid-cols-1 gap-8">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              className="bg-gray-800 rounded-lg border border-gray-700 p-6 
+                hover:border-gray-600 transition-all duration-300"
             >
-              <Image
-                src={
-                  editingId === repo.id
-                    ? imagePreview || repo.image_url || '/net.png'
-                    : repo.image_url || '/net.png'
-                }
-                alt={repo.name}
-                fill
-                className="object-cover hover:scale-105 transition-transform"
-              />
-              {editingId === repo.id && (
-                <label className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-3 py-1.5 rounded cursor-pointer hover:bg-opacity-70 transition-all text-sm">
-                  이미지 변경
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
-              )}
-            </a>
-
-            <h2 className="text-xl font-semibold mb-2">{repo.name}</h2>
-            <div className="flex justify-between items-start mb-4">
-              {editingId === repo.id ? (
-                <div className="flex-1 flex flex-col gap-4">
-                  <textarea
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded resize-none focus:outline-none focus:ring-1 focus:ring-black"
-                    placeholder="프로젝트 설명을 입력하세요"
-                    rows={3}
-                  />
-                  <div className="flex gap-2 justify-end">
+              <div className="flex flex-col md:flex-row gap-6">
+                {project.image_url && (
+                  <div className="w-full md:w-1/3 relative aspect-video">
+                    <Image
+                      src={project.image_url}
+                      alt={project.name}
+                      fill
+                      className="object-cover rounded-lg"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    {editingId === project.id ? (
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="w-full text-gray-300 mb-2"
+                        />
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full px-3 py-2 mb-2 bg-gray-700 border border-gray-600 rounded text-white"
+                        />
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full px-3 py-2 mb-4 bg-gray-700 border border-gray-600 rounded text-white"
+                          rows={3}
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleSave(project.id)}
+                            className="px-4 py-1.5 bg-gray-600 text-white rounded hover:bg-gray-500"
+                          >
+                            저장
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-4 py-1.5 border border-gray-600 text-gray-300 rounded hover:bg-gray-700"
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <h2 className="text-xl font-bold mb-4 text-white">
+                          {project.name}
+                          <button
+                            onClick={() => handleEdit(project)}
+                            className="ml-2 text-gray-400 hover:text-white"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </h2>
+                        <p className="text-gray-300 mb-4">
+                          {project.custom_description || project.description}
+                        </p>
+                      </div>
+                    )}
                     <button
-                      onClick={() => handleSave(repo)}
-                      className="px-4 py-1.5 bg-black text-white rounded hover:bg-gray-800 transition-colors text-sm"
+                      onClick={() =>
+                        setShowQR(showQR === project.id ? null : project.id)
+                      }
+                      className="text-gray-400 hover:text-white transition-colors"
                     >
-                      저장
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingId(null);
-                        setImagePreview('');
-                      }}
-                      className="px-4 py-1.5 border border-gray-300 rounded hover:bg-gray-100 transition-colors text-sm"
-                    >
-                      취소
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d={
+                            showQR === project.id
+                              ? 'M20 12H4'
+                              : 'M12 4v16m8-8H4'
+                          }
+                        />
+                      </svg>
                     </button>
                   </div>
-                </div>
-              ) : (
-                <>
-                  <p className="text-gray-600 break-words">
-                    {repo.custom_description || '설명이 없습니다.'}
-                  </p>
-                  <button
-                    onClick={() => handleEdit(repo)}
-                    className="ml-2 p-1 text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <div className="flex items-center gap-4">
+                    <a
+                      href={project.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-white transition-colors"
+                      title="GitHub Repository"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                      />
-                    </svg>
-                  </button>
-                </>
-              )}
+                      <svg
+                        className="w-6 h-6"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+                      </svg>
+                    </a>
+                    {project.vercel_url && (
+                      <a
+                        href={project.vercel_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-400 hover:text-white transition-colors"
+                        title="Vercel Deployment"
+                      >
+                        <svg
+                          className="w-6 h-6"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M24 22.525H0l12-21.05 12 21.05z" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </div>
+                {showQR === project.id && (
+                  <div className="flex flex-col items-center gap-2 p-4 bg-white rounded-lg">
+                    <QRCodeSVG
+                      value={`https://github.com/Rickyphantom/${project.name}`}
+                      size={128}
+                      level="H"
+                      includeMargin
+                    />
+                    <span className="text-sm text-gray-600">
+                      GitHub QR Code
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className="flex items-center gap-4 mb-4">
-              {repo.language && (
-                <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-                  {repo.language}
-                </span>
-              )}
-              <span className="text-sm text-gray-500 flex items-center gap-1">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                {repo.stargazers_count}
-              </span>
-            </div>
-
-            <a
-              href={repo.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block hover:opacity-80 transition-opacity"
-            >
-              <Image
-                src="/github.png"
-                alt="GitHub"
-                width={32}
-                height={32}
-                className="w-8 h-8"
-              />
-            </a>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
